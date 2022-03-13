@@ -9,7 +9,7 @@ import torch
 from customDataset import ImagesDataset
 from torch.utils.data import DataLoader
 pd.set_option('display.max_columns', None)
-
+from sklearn.model_selection import train_test_split
 
 # Images are encoded with Resnet152
 # ----------------------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ pd.set_option('display.max_columns', None)
 # new_data.drop("index", axis=1, inplace=True)
 # new_data.to_csv("./data/encoded_dataset.csv", index=False)
 
-
+# ----------------------------------------------------------------------------------------------------------------------
 # Analysis Begins
 dataset = pd.read_csv("./data/encoded_dataset.csv")
-dataset.head()
+X_train, X_test, y_train, y_test = train_test_split(dataset.drop(columns=["Book-Rating"]), dataset["Book-Rating"])
