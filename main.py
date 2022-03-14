@@ -10,6 +10,9 @@ from customDataset import ImagesDataset
 from torch.utils.data import DataLoader
 pd.set_option('display.max_columns', None)
 from sklearn.model_selection import train_test_split
+from sklearn.cluster import KMeans
+from yellowbrick.cluster import KElbowVisualizer
+
 
 # Images are encoded with Resnet152
 # ----------------------------------------------------------------------------------------------------------------------
@@ -53,4 +56,36 @@ from sklearn.model_selection import train_test_split
 # ----------------------------------------------------------------------------------------------------------------------
 # Analysis Begins
 dataset = pd.read_csv("./data/encoded_dataset.csv")
-X_train, X_test, y_train, y_test = train_test_split(dataset.drop(columns=["Book-Rating"]), dataset["Book-Rating"])
+x = dataset.drop(columns=["Book-Rating"])
+y = dataset["Book-Rating"]
+# X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=7)
+# x.head()
+
+book_encoded = x.drop_duplicates(subset=["ISBN"])
+book_encoded.head()
+
+kmeans = KMeans()
+elbow = KElbowVisualizer(kmeans, k=(5, 15))
+elbow.fit(book_encoded[[str(i) for i in range(300)]])
+elbow.elbow_value_
+
+kmeans = KMeans(n_clusters=elbow.elbow_value_).fit(book_encoded[[str(i) for i in range(300)]])
+
+book_encoded["clusters"] = kmeans.labels_
+
+book_map = book_encoded[["ISBN", "clusters"]]
+book_map.set_index("ISBN", inplace=True)
+
+x = x[["User-ID", "ISBN", "Book-Title", "Book-Author", "Year-Of-Publication", "Publisher"]]
+
+x["clusters"] = x["ISBN"].map(book_map.to_dict())
+
+
+
+
+
+
+
+
+
+
